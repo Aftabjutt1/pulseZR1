@@ -1,4 +1,8 @@
-import { signupService, verifyUserService } from "../services/authService.js";
+import {
+  signupService,
+  verifyUserService,
+  loginService,
+} from "../services/authService.js";
 
 const signup = async (req, res) => {
   try {
@@ -23,4 +27,17 @@ const verifyUser = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-export { signup, verifyUser };
+
+const login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await loginService(req.body);
+    res.status(201).json({
+      message: "User successfully logged in",
+      user,
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+export { signup, verifyUser, login };
