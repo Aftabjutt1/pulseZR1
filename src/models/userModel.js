@@ -3,13 +3,19 @@ import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
-    first_name: { type: String, required: true },
-    last_name: { type: String, required: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    phone_number: { type: String, required: true },
+    phoneNumber: { type: String, required: true },
     password: { type: String, required: true },
+    verificationCode: { type: String },
+    isVerified: { type: Boolean, default: false },
+    blocked: { type: Boolean, default: false }, // Add blocked status
   },
-  { collection: "users" }
+  {
+    collection: "user",
+    timestamps: true, // Enable automatic createdAt and updatedAt
+  }
 );
 
 userSchema.pre("save", async function (next) {
@@ -22,4 +28,4 @@ userSchema.pre("save", async function (next) {
 
 const User = mongoose.model("User", userSchema);
 
-export default User;
+export { User };

@@ -1,19 +1,25 @@
 const validateSignup = (req, res, next) => {
-  const { first_name, last_name, email, phone_number, password, confirm_password } =
-    req.body;
+  const {
+    first_name: firstName,
+    last_name: lastName,
+    email,
+    phone_number: phoneNumber,
+    password,
+    confirm_password: confirmPassword,
+  } = req.body;
 
   if (
-    !first_name ||
-    !last_name ||
+    !firstName ||
+    !lastName ||
     !email ||
-    !phone_number ||
+    !phoneNumber ||
     !password ||
-    !confirm_password
+    !confirmPassword
   ) {
     return res.status(400).json({ error: "All fields are required" });
   }
 
-  if (password !== confirm_password) {
+  if (password !== confirmPassword) {
     return res.status(400).json({ error: "Passwords do not match" });
   }
 
