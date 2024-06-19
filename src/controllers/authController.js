@@ -9,10 +9,10 @@ import {
 const signup = async (req, res) => {
   try {
     const user = await signupService(req.body);
-    res.status(201).json({
+    res.status(200).json({
       message:
         "User created successfully. Please check your email for the verification code.",
-      user,
+      data: user,
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -24,7 +24,9 @@ const verifyUser = async (req, res) => {
 
   try {
     const user = await verifyUserService(email, verificationCode);
-    res.status(200).json({ message: "Email verified successfully", user });
+    res
+      .status(200)
+      .json({ message: "Email verified successfully", data: user });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -34,9 +36,9 @@ const login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await loginService(email, password);
-    res.status(201).json({
+    res.status(200).json({
       message: "User successfully logged in",
-      user,
+      data: user,
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -47,9 +49,9 @@ const forgotPassword = async (req, res) => {
   const { email } = req.body;
   try {
     const user = await forgotPasswordService(email);
-    res.status(201).json({
+    res.status(200).json({
       message: "An authentication code has been sent to your email.",
-      user,
+      data: user,
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -59,9 +61,9 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   try {
     const user = await resetPasswordService(req.body);
-    res.status(201).json({
+    res.status(200).json({
       message: "Password reset successfully.",
-      user,
+      data: user,
     });
   } catch (error) {
     res.status(400).json({ error: error.message });

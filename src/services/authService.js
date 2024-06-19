@@ -90,7 +90,6 @@ const loginService = async (email, password) => {
     password.trim(),
     existingUser.password
   );
-  console.log("Is Password Valid: ", isPasswordValid);
 
   if (!isPasswordValid) {
     throw new Error("Invalid email or password");
