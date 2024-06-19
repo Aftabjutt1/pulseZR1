@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import { User } from "../models/userModel.js";
 import jwt from "jsonwebtoken";
+import { generateVerificationCode } from "../utils/authUtil.js";
 // import { sendVerificationEmail } from "../utils/email.js";
 
 const signupService = async (userData) => {
@@ -18,7 +19,7 @@ const signupService = async (userData) => {
   }
 
   const hashedPassword = await bcrypt.hash(password.trim(), 12);
-  const verificationCode = crypto.randomBytes(3).toString("hex"); // Generate a 6-character verification code
+  const verificationCode = generateVerificationCode();
 
   const newUser = new User({
     firstName,
@@ -95,6 +96,11 @@ const loginService = async (email, password) => {
     throw new Error("Invalid email or password");
   }
 
+  if (existingUser.verificationCode) {
+    existingUser.verificationCode = undefined; // Remove the verification code once verified
+    await existingUser.save();
+  }
+
   // Generate a JWT
   const token = jwt.sign(
     { userId: existingUser._id, email: existingUser.email },
@@ -110,8 +116,70 @@ const loginService = async (email, password) => {
       lastName: existingUser.lastName,
       email: existingUser.email,
       phoneNumber: existingUser.phoneNumber,
+      isVerified: existingUser.isVerified,
+      blocked: existingUser.blocked,
+      createdAt: existingUser.createdAt,
+      updatedAt: existingUser.updatedAt,
     },
   };
 };
 
-export { signupService, verifyUserService, loginService };
+const forgotPasswordService = async (email) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+  user.verificationCode = generateVerificationCode();
+  await user.save();
+  // Send verification code to user's email or phone number
+  // await sendVerificationEmail(email, verificationCode);
+  return {
+    user: {
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      isVerified: user.isVerified,
+      blocked: user.blocked,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    },
+  };
+};
+
+const resetPasswordService = async (requestBody) => {
+  const { email, password } = requestBody;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const hashedPassword = await bcrypt.hash(password.trim(), 12);
+  user.password = hashedPassword;
+
+  await user.save();
+  return {
+    user: {
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      isVerified: user.isVerified,
+      blocked: user.blocked,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    },
+  };
+};
+
+export {
+  signupService,
+  verifyUserService,
+  loginService,
+  forgotPasswordService,
+  resetPasswordService,
+};

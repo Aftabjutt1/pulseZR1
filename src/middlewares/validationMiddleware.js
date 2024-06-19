@@ -65,4 +65,27 @@ const validateLogin = (req, res, next) => {
   next();
 };
 
-export { validateSignup, validateLogin };
+const validateResetPassword = (req, res, next) => {
+  const { password, confirm_password: confirmPassword } = req.body;
+
+  if (password !== confirmPassword) {
+    return res.status(400).json({ error: "Passwords do not match" });
+  }
+
+  if (password.length < 8) {
+    return res
+      .status(400)
+      .json({ error: "Password must be at least 8 characters long" });
+  }
+
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // At least one letter and one number
+  if (!passwordRegex.test(password)) {
+    return res.status(400).json({
+      error: "Password must contain at least one letter and one number",
+    });
+  }
+
+  next();
+};
+
+export { validateSignup, validateLogin, validateResetPassword };

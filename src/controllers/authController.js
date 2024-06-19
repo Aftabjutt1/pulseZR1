@@ -2,6 +2,8 @@ import {
   signupService,
   verifyUserService,
   loginService,
+  forgotPasswordService,
+  resetPasswordService,
 } from "../services/authService.js";
 
 const signup = async (req, res) => {
@@ -31,7 +33,7 @@ const verifyUser = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await loginService(req.body);
+    const user = await loginService(email, password);
     res.status(201).json({
       message: "User successfully logged in",
       user,
@@ -40,4 +42,30 @@ const login = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-export { signup, verifyUser, login };
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await forgotPasswordService(email);
+    res.status(201).json({
+      message: "An authentication code has been sent to your email.",
+      user,
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const user = await resetPasswordService(req.body);
+    res.status(201).json({
+      message: "Password reset successfully.",
+      user,
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export { signup, verifyUser, login, forgotPassword, resetPassword };
