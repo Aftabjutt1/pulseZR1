@@ -15,6 +15,7 @@ const signup = async (req, res) => {
       data: user,
     });
   } catch (error) {
+    console.error("Error: ", error);
     res.status(400).json({ error: error.message });
   }
 };
@@ -28,6 +29,7 @@ const verifyUser = async (req, res) => {
       .status(200)
       .json({ message: "Email verified successfully", data: user });
   } catch (error) {
+    console.error("Error: ", error);
     res.status(400).json({ error: error.message });
   }
 };
@@ -41,6 +43,7 @@ const login = async (req, res) => {
       data: user,
     });
   } catch (error) {
+    console.error("Error: ", error);
     res.status(400).json({ error: error.message });
   }
 };
@@ -54,6 +57,7 @@ const forgotPassword = async (req, res) => {
       data: user,
     });
   } catch (error) {
+    console.error("Error: ", error);
     res.status(400).json({ error: error.message });
   }
 };
@@ -66,6 +70,7 @@ const resetPassword = async (req, res) => {
       data: user,
     });
   } catch (error) {
+    console.error("Error: ", error);
     res.status(400).json({ error: error.message });
   }
 };

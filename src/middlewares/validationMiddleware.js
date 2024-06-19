@@ -1,3 +1,5 @@
+import { Types } from "mongoose";
+
 const validateSignup = (req, res, next) => {
   const {
     first_name: firstName,
@@ -88,4 +90,26 @@ const validateResetPassword = (req, res, next) => {
   next();
 };
 
-export { validateSignup, validateLogin, validateResetPassword };
+const validateUpdateUser = (req, res, next) => {
+  const { user_id: _id } = req.body;
+
+  // Validate if _id is provided
+  if (!_id) {
+    return res.status(400).json({ error: "Id is required" });
+  }
+
+  // Check if _id is provided and if it matches the expected ObjectId length
+  if (_id && !Types.ObjectId.isValid(_id)) {
+    return res.status(400).json({ error: "Invalid Id format" });
+  }
+
+  // Proceed to the next middleware or controller
+  next();
+};
+
+export {
+  validateSignup,
+  validateLogin,
+  validateResetPassword,
+  validateUpdateUser,
+};
