@@ -3,7 +3,7 @@ import {
   ReportedUser,
   ReportedUserStatus,
   convertReportedUserStatusNameToType,
-} from "../models/reportedUserModel .js";
+} from "../models/reportedUserModel.js";
 
 const userListService = async (page = 1, limit = 10) => {
   try {
@@ -92,4 +92,38 @@ const reportUserService = async (requestContent) => {
   }
 };
 
-export { userListService, userUpdateService, reportUserService };
+const reportUserListService = async (page = 1, limit = 10, status = null) => {
+  try {
+    // Calculate skip value based on page number and limit
+    const skip = (page - 1) * limit;
+
+    const filter =
+      status !== null && status !== ""
+        ? { status: convertReportedUserStatusNameToType(status) }
+        : {};
+    // Query users with pagination and isVerified condition
+    const reportedUsers = await ReportedUser.find(filter)
+      .skip(skip)
+      .limit(limit);
+
+    // Separate blocked and unblocked users during mapping
+    const result =
+      reportedUsers && reportedUsers.length
+        ? reportedUsers.map((reportedUser) => {
+            return reportedUser.serialize();
+          })
+        : [];
+
+    return result;
+  } catch (error) {
+    console.error("Error: ", error);
+    throw new Error(`Failed to fetch user list: ${error.message}`);
+  }
+};
+
+export {
+  userListService,
+  userUpdateService,
+  reportUserService,
+  reportUserListService,
+};

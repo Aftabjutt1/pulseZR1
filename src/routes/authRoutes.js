@@ -10,6 +10,7 @@ import {
   userListController,
   userUpdateController,
   reportedUserController,
+  reportedUserListController,
 } from "../controllers/userController.js";
 
 import {
@@ -18,6 +19,7 @@ import {
   validateResetPassword,
   validateUpdateUser,
   validateRepotedUser,
+  validateRepotedUserList,
 } from "../middlewares/validationMiddleware.js";
 
 const router = express.Router();
@@ -30,5 +32,10 @@ router.post("/reset-password", validateResetPassword, resetPassword);
 router.get("/users", userListController);
 router.post("/user", validateUpdateUser, userUpdateController);
 router.post("/report-user", validateRepotedUser, reportedUserController);
+router.get(
+  "/reported-users",
+  validateRepotedUserList,
+  reportedUserListController
+);
 
 export default router;

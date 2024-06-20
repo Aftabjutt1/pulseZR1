@@ -2,6 +2,7 @@ import {
   userListService,
   userUpdateService,
   reportUserService,
+  reportUserListService,
 } from "../services/userService.js";
 
 const userListController = async (req, res) => {
@@ -43,4 +44,26 @@ const reportedUserController = async (req, res) => {
   }
 };
 
-export { userListController, userUpdateController, reportedUserController };
+const reportedUserListController = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
+    const limit = parseInt(req.query.limit) || 100; // Default to 100 users per page if not provided
+    const status = req.query.status || null;
+
+    const user = await reportUserListService(page, limit, status);
+    res.status(200).json({
+      message: "User reported successfully",
+      data: user,
+    });
+  } catch (error) {
+    console.error("Error: ", error);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export {
+  userListController,
+  userUpdateController,
+  reportedUserController,
+  reportedUserListController,
+};

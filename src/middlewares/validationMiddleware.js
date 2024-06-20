@@ -1,4 +1,6 @@
 import { Types } from "mongoose";
+import { ReportedUserStatus } from "../models/reportedUserModel.js";
+import { convertReportedUserStatusNameToType } from "../models/reportedUserModel.js";
 
 const validateSignup = (req, res, next) => {
   const {
@@ -142,10 +144,26 @@ const validateRepotedUser = (req, res, next) => {
   next();
 };
 
+const validateRepotedUserList = (req, res, next) => {
+  const { status } = req.body;
+
+  if (
+    status &&
+    !ReportedUserStatus.getAllReportedUserStatuses().includes(
+      convertReportedUserStatusNameToType(status)
+    )
+  ) {
+    return res.status(400).json({ error: "Invalid status" });
+  }
+  // Proceed to the next middleware or controller
+  next();
+};
+
 export {
   validateSignup,
   validateLogin,
   validateResetPassword,
   validateUpdateUser,
   validateRepotedUser,
+  validateRepotedUserList,
 };
