@@ -32,17 +32,17 @@ class UserClass {
     blocked: { type: Boolean, default: false },
   };
 
-  static serialize(user) {
+  serialize() {
     return {
-      id: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      isVerified: user.isVerified,
-      blocked: user.blocked,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      id: this._id,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      phoneNumber: this.phoneNumber,
+      isVerified: this.isVerified,
+      blocked: this.blocked,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
     };
   }
 }

@@ -107,9 +107,45 @@ const validateUpdateUser = (req, res, next) => {
   next();
 };
 
+const validateRepotedUser = (req, res, next) => {
+  const { user_id: userId, reporter_id: reporterId, reason } = req.body;
+
+  // Validate if userId is provided
+  if (!userId) {
+    return res.status(400).json({ error: "UserId is required" });
+  }
+
+  // Check if userId is provided and if it matches the expected ObjectId length
+  if (userId && !Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ error: "Invalid UserId format" });
+  }
+  // Validate if user _id is provided
+  if (!reporterId) {
+    return res.status(400).json({ error: "ReporterId is required" });
+  }
+
+  // Check if reporterId is provided and if it matches the expected ObjectId length
+  if (reporterId && !Types.ObjectId.isValid(reporterId)) {
+    return res.status(400).json({ error: "Invalid ReporterId format" });
+  }
+
+  if (typeof reason !== "string") {
+    return res.status(400).json({ error: "Invalid reason format" });
+  }
+  if (!reason || reason === "") {
+    return res
+      .status(400)
+      .json({ error: "Reason is required to report a user" });
+  }
+
+  // Proceed to the next middleware or controller
+  next();
+};
+
 export {
   validateSignup,
   validateLogin,
   validateResetPassword,
   validateUpdateUser,
+  validateRepotedUser,
 };

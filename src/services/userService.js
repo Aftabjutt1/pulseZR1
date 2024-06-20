@@ -1,4 +1,9 @@
 import { User } from "../models/userModel.js";
+import {
+  ReportedUser,
+  ReportedUserStatus,
+  convertReportedUserStatusNameToType,
+} from "../models/reportedUserModel .js";
 
 const userListService = async (page = 1, limit = 10) => {
   try {
@@ -18,7 +23,7 @@ const userListService = async (page = 1, limit = 10) => {
     };
 
     users.forEach((user) => {
-      const serializedUser = User.serialize(user);
+      const serializedUser = user.serialize();
       if (user.blocked) {
         serializedUsers.blockedUsers.push(serializedUser);
       } else {
@@ -46,11 +51,45 @@ const userUpdateService = async (userData) => {
     if (!updatedUser) {
       throw new Error("User not found or could not be updated");
     }
-    return User.serialize(updatedUser);
+    return updatedUser.serialize();
   } catch (error) {
     console.error("Error: ", error);
     throw new Error(`Failed to update user: ${error.message}`);
   }
 };
 
-export { userListService, userUpdateService };
+const reportUserService = async (requestContent) => {
+  try {
+    const {
+      user_id: userId,
+      reporter_id: reporterId,
+      reason,
+      description,
+    } = requestContent;
+    const user = await User.findById({ _id: userId });
+
+    if (!user) {
+      throw new Error(`User not found against id: ${userId}`);
+    }
+
+    const reporter = await User.findById({ _id: reporterId });
+    if (!reporter) {
+      throw new Error(`Reporter not found against id: ${reporterId}`);
+    }
+
+    const reportedUser = await new ReportedUser({
+      userId,
+      reporterId,
+      reason,
+      description,
+      status: ReportedUserStatus.PENDING,
+      adminNotes: "",
+    }).save();
+
+    return reportedUser.serialize();
+  } catch (error) {
+    throw new Error(`Error: ${error.message}`);
+  }
+};
+
+export { userListService, userUpdateService, reportUserService };

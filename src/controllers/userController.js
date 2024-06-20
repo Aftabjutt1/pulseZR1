@@ -1,4 +1,8 @@
-import { userListService, userUpdateService } from "../services/userService.js";
+import {
+  userListService,
+  userUpdateService,
+  reportUserService,
+} from "../services/userService.js";
 
 const userListController = async (req, res) => {
   try {
@@ -26,4 +30,17 @@ const userUpdateController = async (req, res) => {
   }
 };
 
-export { userListController, userUpdateController };
+const reportedUserController = async (req, res) => {
+  try {
+    const user = await reportUserService(req.body);
+    res.status(200).json({
+      message: "User reported successfully",
+      data: user,
+    });
+  } catch (error) {
+    console.error("Error: ", error);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export { userListController, userUpdateController, reportedUserController };
