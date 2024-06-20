@@ -94,7 +94,7 @@ const reportUserService = async (requestContent) => {
 
 const reportUserListService = async (page = 1, limit = 10, status = null) => {
   try {
-    // Calculate skip value based on page number and limit
+    let result = [];
     const skip = (page - 1) * limit;
 
     const filter =
@@ -107,13 +107,40 @@ const reportUserListService = async (page = 1, limit = 10, status = null) => {
       .limit(limit);
 
     // Separate blocked and unblocked users during mapping
-    const result =
+    const serializedReportedUsers =
       reportedUsers && reportedUsers.length
         ? reportedUsers.map((reportedUser) => {
-            return reportedUser.serialize();
+            const serializedReportedUser = reportedUser.serialize();
+            return { ...serializedReportedUser, userData: {} };
           })
         : [];
 
+    if (serializedReportedUsers.length) {
+      const userIds = serializedReportedUsers.map((obj) => {
+        return obj.userId;
+      });
+      const uniqueUserIds = [...new Set(userIds.map((id) => id.toString()))];
+
+      const userFilter = { _id: { $in: uniqueUserIds } };
+      const users = await User.find(userFilter);
+
+      const serializedUsers =
+        users && users.length
+          ? users.map((user) => {
+              return user.serialize();
+            })
+          : [];
+
+      result = serializedReportedUsers.map((reportedUser) => {
+        const user = serializedUsers.find(
+          (user) => reportedUser.userId === user.id
+        );
+        return { ...reportedUser, userData: user ?? {} };
+      });
+    } else {
+      result = serializedReportedUsers;
+    }
+    
     return result;
   } catch (error) {
     console.error("Error: ", error);

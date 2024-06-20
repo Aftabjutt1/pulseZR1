@@ -34,7 +34,7 @@ class UserClass {
 
   serialize() {
     return {
-      id: this._id,
+      id: this._id.toString(),
       firstName: this.firstName,
       lastName: this.lastName,
       email: this.email,

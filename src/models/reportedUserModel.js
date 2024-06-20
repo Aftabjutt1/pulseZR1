@@ -94,9 +94,9 @@ class ReportedUserClass {
 
   serialize() {
     return {
-      id: this._id,
-      userId: this.userId,
-      reporterId: this.reporterId,
+      id: this._id.toString(),
+      userId: this.userId.toString(),
+      reporterId: this.reporterId.toString(),
       reason: this.reason,
       description: this.description,
       reportedTime: this.reportedTime,
