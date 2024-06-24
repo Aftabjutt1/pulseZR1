@@ -109,6 +109,23 @@ const validateUpdateUser = (req, res, next) => {
   next();
 };
 
+const validateGetUser = (req, res, next) => {
+  const { id } = req.query;
+
+  // Validate if _id is provided
+  if (!id) {
+    return res.status(400).json({ error: "Id is required" });
+  }
+
+  // Check if _id is provided and if it matches the expected ObjectId length
+  if (id && !Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ error: "Invalid Id format" });
+  }
+
+  // Proceed to the next middleware or controller
+  next();
+};
+
 const validateRepotedUser = (req, res, next) => {
   const { user_id: userId, reporter_id: reporterId, reason } = req.body;
 
@@ -164,6 +181,7 @@ export {
   validateLogin,
   validateResetPassword,
   validateUpdateUser,
+  validateGetUser,
   validateRepotedUser,
   validateRepotedUserList,
 };

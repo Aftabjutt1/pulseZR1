@@ -8,6 +8,7 @@ import {
 } from "../controllers/authController.js";
 import {
   userListController,
+  userByIdController,
   userUpdateController,
   reportedUserController,
   reportedUserListController,
@@ -18,6 +19,7 @@ import {
   validateLogin,
   validateResetPassword,
   validateUpdateUser,
+  validateGetUser,
   validateRepotedUser,
   validateRepotedUserList,
 } from "../middlewares/validationMiddleware.js";
@@ -31,6 +33,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", validateResetPassword, resetPassword);
 router.get("/users", userListController);
 router.post("/user", validateUpdateUser, userUpdateController);
+router.get("/user", validateGetUser, userByIdController);
 router.post("/report-user", validateRepotedUser, reportedUserController);
 router.get(
   "/reported-users",

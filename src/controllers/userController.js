@@ -1,5 +1,6 @@
 import {
   userListService,
+  getUserByIdService,
   userUpdateService,
   reportUserService,
   reportUserListService,
@@ -12,6 +13,18 @@ const userListController = async (req, res) => {
 
     const users = await userListService(page, limit);
     res.status(200).json(users);
+  } catch (error) {
+    console.error("Error: ", error);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const userByIdController = async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    const user = await getUserByIdService(id);
+    res.status(200).json(user);
   } catch (error) {
     console.error("Error: ", error);
     res.status(400).json({ error: error.message });
@@ -64,6 +77,7 @@ const reportedUserListController = async (req, res) => {
 export {
   userListController,
   userUpdateController,
+  userByIdController,
   reportedUserController,
   reportedUserListController,
 };

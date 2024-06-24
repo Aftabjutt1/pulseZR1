@@ -38,6 +38,16 @@ const userListService = async (page = 1, limit = 10) => {
   }
 };
 
+const getUserByIdService = async (id) => {
+  try {
+    const user = await User.findById(id);
+    return user.serialize();
+  } catch (error) {
+    console.error("Error: ", error);
+    throw new Error(`Failed to fetch user list: ${error.message}`);
+  }
+};
+
 const userUpdateService = async (userData) => {
   try {
     const { user_id: _id, ...updateData } = userData; // Extract userId and rest of the fields from userData
@@ -140,7 +150,7 @@ const reportUserListService = async (page = 1, limit = 10, status = null) => {
     } else {
       result = serializedReportedUsers;
     }
-    
+
     return result;
   } catch (error) {
     console.error("Error: ", error);
@@ -150,6 +160,7 @@ const reportUserListService = async (page = 1, limit = 10, status = null) => {
 
 export {
   userListService,
+  getUserByIdService,
   userUpdateService,
   reportUserService,
   reportUserListService,
