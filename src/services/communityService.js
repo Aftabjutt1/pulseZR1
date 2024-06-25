@@ -2,7 +2,7 @@ import { User } from "../models/userModel.js";
 import { checkRecordsExist } from "./util.js";
 import { Community } from "../models/communityModel.js";
 
-const createCommunityService = async (communityData) => {
+const createCommunity = async (communityData) => {
   try {
     const {
       user_id: userId,
@@ -14,7 +14,6 @@ const createCommunityService = async (communityData) => {
 
     const userIds = [...new Set([...memberIds, ...adminIds, userId])];
 
-    console.log("userIds: ", userIds);
     const { allExist, missingIds } = await checkRecordsExist(userIds, User);
     if (!allExist) {
       throw new Error(
@@ -38,16 +37,59 @@ const createCommunityService = async (communityData) => {
   }
 };
 
+const updateCommunity = async (updateData) => {
+  try {
+    const {
+      community_id: communityId,
+      user_id: userId,
+      name,
+      description,
+    } = updateData;
+
+    const userIds = [...new Set([...memberIds, ...adminIds, userId])];
+
+    const { allExist, missingIds } = await checkRecordsExist(userIds, User);
+    if (!allExist) {
+      throw new Error(
+        `The user(s) do not exist for these ID(s): ${missingIds}`
+      );
+    }
+
+    const community = await Community.findByIdAndUpdate(
+      communityId,
+      {
+        name,
+        description,
+        updatedBy: userId,
+        updatedAt: new Date(),
+      },
+      { new: true }
+    );
+
+    if (!community) {
+      throw new Error(`Community with ID ${communityId} not found`);
+    }
+
+    return community.serialize();
+  } catch (error) {
+    console.error("Error: ", error);
+    throw error;
+  }
+};
 
 const countOnlineUsers = async (communityId) => {
   try {
-    const community = await Community.findById(communityId)
-      .populate('memberIds')
-      
+    const community = await Community.findById(communityId).populate(
+      "memberIds"
+    );
+
     const memberIds = community.memberIds;
-    
+
     // Count online users
-    const onlineUsers = await User.countDocuments({ _id: { $in: memberIds }, online: true });
+    const onlineUsers = await User.countDocuments({
+      _id: { $in: memberIds },
+      online: true,
+    });
 
     return onlineUsers;
   } catch (err) {
@@ -56,4 +98,4 @@ const countOnlineUsers = async (communityId) => {
   }
 };
 
-export { createCommunityService, countOnlineUsers };
+export { createCommunity, updateCommunity, countOnlineUsers };

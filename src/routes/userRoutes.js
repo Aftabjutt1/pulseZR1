@@ -1,11 +1,12 @@
 import express from "express";
+
 import {
-  signup,
-  verifyUser,
-  login,
-  logout,
-  forgotPassword,
-  resetPassword,
+  signupController,
+  verifyUserController,
+  loginController,
+  logoutController,
+  forgotPasswordController,
+  resetPasswordController,
 } from "../controllers/authController.js";
 import {
   userListController,
@@ -14,9 +15,6 @@ import {
   reportedUserController,
   reportedUserListController,
 } from "../controllers/userController.js";
-
-import { communityCreateController } from "../controllers/communityController.js";
-
 import {
   validateSignup,
   validateLogin,
@@ -28,17 +26,14 @@ import {
   validateRepotedUserList,
 } from "../middlewares/userValidation.js";
 
-import { validateUpsertCommunity } from "../middlewares/communityValidation.js";
-
 const router = express.Router();
 
-// User APIs
-router.post("/signup", validateSignup, signup);
-router.post("/verify", verifyUser);
-router.post("/login", validateLogin, login);
-router.post("/logout", validateLogout, logout);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password", validateResetPassword, resetPassword);
+router.post("/user/signup", validateSignup, signupController);
+router.post("/user/verify", verifyUserController);
+router.post("/user/login", validateLogin, loginController);
+router.post("/user/logout", validateLogout, logoutController);
+router.post("/user/forgot-password", forgotPasswordController);
+router.post("/user/reset-password", validateResetPassword, resetPasswordController);
 router.get("/users", userListController);
 router.post("/user", validateUpdateUser, userUpdateController);
 router.get("/user", validateGetUser, userByIdController);
@@ -48,11 +43,5 @@ router.get(
   validateRepotedUserList,
   reportedUserListController
 );
-
-// Comunity APIs
-router.post("/community", validateUpsertCommunity, communityCreateController);
-// router.post("/community", validateUpsertCommunity, communityUpdateController);
-// router.get("/community", communityListController);
-// router.get("/community", communityListController);
 
 export default router;

@@ -1,30 +1,28 @@
 import mongoose from "mongoose";
 
-class ReportedUserStatus {
-  constructor() {}
+// Define static status codes and names
+const ReportedUserStatus = {
+  PENDING: 1000,
+  RESOLVED: 1001,
+  REJECTED: 1002,
 
-  static PENDING = 1000;
-  static RESOLVED = 1001;
-  static REJECTED = 1002;
-
-  static getAllReportedUserStatuses() {
+  getAllStatuses() {
     return [this.PENDING, this.RESOLVED, this.REJECTED];
   }
-}
+};
 
-class ReportedUserStatusName {
-  constructor() {}
+const ReportedUserStatusName = {
+  PENDING: "PENDING",
+  RESOLVED: "RESOLVED",
+  REJECTED: "REJECTED",
 
-  static PENDING = "PENDING";
-  static RESOLVED = "RESOLVED";
-  static REJECTED = "REJECTED";
-
-  static getAllReportedUserStatusNames() {
+  getAllStatusNames() {
     return [this.PENDING, this.RESOLVED, this.REJECTED];
   }
-}
+};
 
-const convertReportedUserStatusToName = (status) => {
+// Helper functions to convert between status and status name
+const convertReportedUserStatusNameToType = (status) => {
   switch (status) {
     case ReportedUserStatus.PENDING:
       return ReportedUserStatusName.PENDING;
@@ -37,7 +35,7 @@ const convertReportedUserStatusToName = (status) => {
   }
 };
 
-const convertReportedUserStatusNameToType = (statusName) => {
+const convertReportedUserStatusToName = (statusName) => {
   switch (statusName) {
     case ReportedUserStatusName.PENDING:
       return ReportedUserStatus.PENDING;
@@ -59,6 +57,7 @@ class ReportedUserClass {
     reportedTime,
     status,
     adminNotes,
+    resolution,
   }) {
     this.userId = userId;
     this.reporterId = reporterId;
@@ -67,30 +66,8 @@ class ReportedUserClass {
     this.reportedTime = reportedTime;
     this.status = status;
     this.adminNotes = adminNotes;
+    this.resolution = resolution;
   }
-
-  static schema = {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    reporterId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    reason: { type: String, required: true },
-    description: { type: String },
-    reportedTime: { type: Date, default: Date.now },
-    status: {
-      type: Number,
-      enum: ReportedUserStatus.getAllReportedUserStatuses(),
-      default: ReportedUserStatus.PENDING,
-    },
-    adminNotes: { type: String },
-    resolution: { type: String },
-  };
 
   serialize() {
     return {
@@ -100,15 +77,38 @@ class ReportedUserClass {
       reason: this.reason,
       description: this.description,
       reportedTime: this.reportedTime,
-      status: convertReportedUserStatusToName(this.status),
+      status: convertStatusToName(this.status),
       adminNotes: this.adminNotes,
+      resolution: this.resolution,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };
   }
 }
 
-const reportedUserSchema = new mongoose.Schema(ReportedUserClass.schema, {
+// Define ReportedUser schema and class
+const reportedUserSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  reporterId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  reason: { type: String, required: true },
+  description: { type: String },
+  reportedTime: { type: Date, default: Date.now },
+  status: {
+    type: Number,
+    enum: ReportedUserStatus.getAllStatuses(),
+    default: ReportedUserStatus.PENDING,
+  },
+  adminNotes: { type: String },
+  resolution: { type: String },
+}, {
   collection: "reportedUser",
   timestamps: true,
 });

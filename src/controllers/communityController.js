@@ -1,9 +1,12 @@
 import { getUserByIdService } from "../services/userService.js";
-import { createCommunityService } from "../services/communityService.js";
+import {
+  createCommunity,
+  updateCommunity,
+} from "../services/communityService.js";
 
 const communityCreateController = async (req, res) => {
   try {
-    const community = await createCommunityService(req.body);
+    const community = await createCommunity(req.body);
     res.status(200).json({
       message: "Community created successfully",
       data: community,
@@ -16,10 +19,10 @@ const communityCreateController = async (req, res) => {
 
 const communityUpdateController = async (req, res) => {
   try {
-    const user = await getUserByIdService(req.body);
+    const community = await updateCommunity(req.body);
     res.status(200).json({
-      message: "Community Update successfully",
-      data: user,
+      message: "Community updated successfully",
+      data: community,
     });
   } catch (error) {
     console.error("Error: ", error);

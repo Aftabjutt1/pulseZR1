@@ -1,15 +1,15 @@
 import {
-  signupService,
+  signupUser,
   verifyUserService,
-  loginService,
-  logoutService,
-  forgotPasswordService,
-  resetPasswordService,
+  loginUser,
+  logoutUser,
+  forgotPassword,
+  resetPassword,
 } from "../services/authService.js";
 
-const signup = async (req, res) => {
+const signupController = async (req, res) => {
   try {
-    const user = await signupService(req.body);
+    const user = await signupUser(req.body);
     res.status(200).json({
       message:
         "User created successfully. Please check your email for the verification code.",
@@ -21,7 +21,7 @@ const signup = async (req, res) => {
   }
 };
 
-const verifyUser = async (req, res) => {
+const verifyUserController = async (req, res) => {
   const { email, verification_code: verificationCode } = req.body;
 
   try {
@@ -35,10 +35,10 @@ const verifyUser = async (req, res) => {
   }
 };
 
-const login = async (req, res) => {
+const loginController = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await loginService(email, password);
+    const user = await loginUser(email, password);
     res.status(200).json({
       message: "User successfully logged in",
       data: user,
@@ -49,10 +49,10 @@ const login = async (req, res) => {
   }
 };
 
-const logout = async (req, res) => {
+const logoutController = async (req, res) => {
   const { user_id: userId } = req.body;
   try {
-    const user = await logoutService(userId);
+    const user = await logoutUser(userId);
     res.status(200).json({
       message: "User successfully logged out",
       data: user,
@@ -63,10 +63,10 @@ const logout = async (req, res) => {
   }
 };
 
-const forgotPassword = async (req, res) => {
+const forgotPasswordController = async (req, res) => {
   const { email } = req.body;
   try {
-    const user = await forgotPasswordService(email);
+    const user = await forgotPassword(email);
     res.status(200).json({
       message: "An authentication code has been sent to your email.",
       data: user,
@@ -77,9 +77,9 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-const resetPassword = async (req, res) => {
+const resetPasswordController = async (req, res) => {
   try {
-    const user = await resetPasswordService(req.body);
+    const user = await resetPassword(req.body);
     res.status(200).json({
       message: "Password reset successfully.",
       data: user,
@@ -90,4 +90,11 @@ const resetPassword = async (req, res) => {
   }
 };
 
-export { signup, verifyUser, login, forgotPassword, resetPassword };
+export {
+  signupController,
+  verifyUserController,
+  loginController,
+  logoutController,
+  forgotPasswordController,
+  resetPasswordController,
+};

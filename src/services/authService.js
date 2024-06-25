@@ -1,10 +1,9 @@
 import bcrypt from "bcrypt";
 import { User } from "../models/userModel.js";
-import jwt from "jsonwebtoken";
 import { generateVerificationCode } from "../utils/authUtil.js";
 // import { sendVerificationEmail } from "../utils/email.js";
 
-const signupService = async (userData) => {
+const signupUser = async (userData) => {
   try {
     const {
       first_name: firstName,
@@ -14,9 +13,9 @@ const signupService = async (userData) => {
       password,
     } = userData;
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      throw new Error("User already exists");
+    const user = await User.findOne({ email });
+    if (user) {
+      throw new Error("User already exists with this email");
     }
 
     const hashedPassword = await bcrypt.hash(password.trim(), 12);
@@ -50,7 +49,7 @@ const signupService = async (userData) => {
       },
     };
   } catch (error) {
-    console.error("Error in signupService:", error);
+    console.error("Error in signupUser:", error);
     throw new Error(`Failed to signup user: ${error.message}`);
   }
 };
@@ -78,67 +77,46 @@ const verifyUserService = async (email, verificationCode) => {
   }
 };
 
-const loginService = async (email, password) => {
+const loginUser = async (email, password) => {
   try {
     // Check if the user exists
-    const existingUser = await User.findOne({ email });
-    if (!existingUser) {
+    const user = await User.findOne({ email });
+    if (!user) {
       throw new Error("Invalid email or password");
-    }
-
-    // Check if the user is verified
-    if (!existingUser.isVerified) {
-      throw new Error("Account is not verified. Please verify your email.");
-    }
-
-    // Check if the user is blocked
-    if (existingUser.blocked) {
-      throw new Error("Your account is blocked. Please contact support.");
     }
 
     // Verify the password
     const isPasswordValid = await bcrypt.compare(
       password.trim(),
-      existingUser.password
+      user.password
     );
-
     if (!isPasswordValid) {
       throw new Error("Invalid email or password");
     }
 
-    if (existingUser.verificationCode) {
-      existingUser.verificationCode = undefined; // Remove the verification code once verified
-      await existingUser.save();
+    // Check if the user is verified
+    if (!user.isVerified) {
+      throw new Error("Account is not verified. Please verify your email.");
     }
 
-    // Generate a JWT
-    const token = jwt.sign(
-      { userId: existingUser._id, email: existingUser.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    // Check if the user is blocked
+    if (user.blocked) {
+      throw new Error("Your account is blocked. Please contact support.");
+    }
 
-    return {
-      token,
-      user: {
-        id: existingUser._id,
-        firstName: existingUser.firstName,
-        lastName: existingUser.lastName,
-        email: existingUser.email,
-        phoneNumber: existingUser.phoneNumber,
-        isVerified: existingUser.isVerified,
-        blocked: existingUser.blocked,
-        createdAt: existingUser.createdAt,
-        updatedAt: existingUser.updatedAt,
-      },
-    };
+    if (user.verificationCode) {
+      user.verificationCode = undefined; // Remove the verification code once verified
+      await user.save();
+    }
+
+    return user.serialize();
   } catch (error) {
-    console.error("Error in loginService:", error);
+    console.error("Error in loginUser:", error);
     throw new Error(`Failed to login user: ${error.message}`);
   }
 };
 
-const logoutService = async (userId) => {
+const logoutUser = async (userId) => {
   try {
     // Check if the user exists
     const user = await User.findById(id);
@@ -148,12 +126,12 @@ const logoutService = async (userId) => {
     user.online = false;
     await user.save();
   } catch (error) {
-    console.error("Error in logoutService:", error);
+    console.error("Error in logoutUser:", error);
     throw new Error(`Failed to process logout user request: ${error.message}`);
   }
 };
 
-const forgotPasswordService = async (email) => {
+const forgotPassword = async (email) => {
   try {
     const user = await User.findOne({ email });
 
@@ -165,29 +143,16 @@ const forgotPasswordService = async (email) => {
     await user.save();
     // Send verification code to user's email or phone number
     // await sendVerificationEmail(email, verificationCode);
-
-    return {
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        isVerified: user.isVerified,
-        blocked: user.blocked,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
-    };
+    return user.serialize();
   } catch (error) {
-    console.error("Error in forgotPasswordService:", error);
+    console.error("Error in forgotPassword:", error);
     throw new Error(
       `Failed to process forgot password request: ${error.message}`
     );
   }
 };
 
-const resetPasswordService = async (requestBody) => {
+const resetPassword = async (requestBody) => {
   try {
     const { email, password } = requestBody;
     const user = await User.findOne({ email });
@@ -200,31 +165,18 @@ const resetPasswordService = async (requestBody) => {
     user.password = hashedPassword;
 
     await user.save();
-
-    return {
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        isVerified: user.isVerified,
-        blocked: user.blocked,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
-    };
+    return user.serialize();
   } catch (error) {
-    console.error("Error in resetPasswordService:", error);
+    console.error("Error in resetPassword:", error);
     throw new Error(`Failed to reset password: ${error.message}`);
   }
 };
 
 export {
-  signupService,
+  signupUser,
   verifyUserService,
-  loginService,
-  logoutService,
-  forgotPasswordService,
-  resetPasswordService,
+  loginUser,
+  logoutUser,
+  forgotPassword,
+  resetPassword,
 };
