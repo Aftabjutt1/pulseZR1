@@ -61,4 +61,66 @@ const validateUpdateCommunity = (req, res, next) => {
 
   next();
 };
-export { validateCreateCommunity, validateUpdateCommunity };
+
+const validateaddMembersToCommunity = (req, res, next) => {
+  const {
+    user_id: userId,
+    community_id: communityId,
+    member_ids: memberIds,
+  } = req.body;
+
+  if (!communityId) {
+    return res
+      .status(400)
+      .json({ error: "Community Id is required to add a member" });
+  }
+
+  if (!userId) {
+    return res
+      .status(400)
+      .json({ error: "User Id is required to Update Community" });
+  }
+
+  if (!memberIds || !Array.isArray(memberIds) || memberIds.length === 0) {
+    return res
+      .status(400)
+      .json({ error: "Member Ids should be provided as a non-empty array" });
+  }
+
+  next();
+};
+
+const validateremoveMembersFromCommunity = (req, res, next) => {
+  const {
+    user_id: userId,
+    community_id: communityId,
+    member_ids: memberIds,
+  } = req.body;
+
+  if (!communityId) {
+    return res
+      .status(400)
+      .json({ error: "Community Id is required to remove a member" });
+  }
+
+  if (!userId) {
+    return res
+      .status(400)
+      .json({ error: "User Id is required to Update Community" });
+  }
+
+  if (!memberIds || !Array.isArray(memberIds) || memberIds.length === 0) {
+    return res
+      .status(400)
+      .json({ error: "Member Ids should be provided as a non-empty array" });
+  }
+
+  next();
+};
+
+export {
+  validateCreateCommunity,
+  validateUpdateCommunity,
+  validateaddMembersToCommunity,
+  validateremoveMembersFromCommunity,
+};
