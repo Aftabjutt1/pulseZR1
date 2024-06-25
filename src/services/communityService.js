@@ -147,16 +147,18 @@ const removeMembersFromCommunity = async (userId, communityId, memberIds) => {
     let shouldSave = false;
 
     for (const memberId of memberIds) {
+      // Check if the member is an admin
+      if (community.adminIds.includes(memberId)) {
+        console.log(`Member ${memberId} is an admin, skipping removal.`);
+        continue; // Skip processing this member
+      }
+
       if (!community.memberIds.includes(memberId)) {
         console.log(`Member ${memberId} not found in the community, skipping.`);
         continue; // Skip processing this member
       }
 
       community.memberIds = community.memberIds.filter(
-        (id) => id.toString() !== memberId
-      );
-
-      community.adminIds = community.adminIds.filter(
         (id) => id.toString() !== memberId
       );
 
@@ -175,6 +177,7 @@ const removeMembersFromCommunity = async (userId, communityId, memberIds) => {
     throw error;
   }
 };
+
 
 const makeAdminOnCommunity = async (communityId, userId, memberId) => {
   try {
