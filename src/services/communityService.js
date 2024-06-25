@@ -46,26 +46,20 @@ const updateCommunity = async (updateData) => {
       description,
     } = updateData;
 
-    // Check if user is an admin of the community
-    const isAuthorized = await Community.exists({
-      _id: communityId,
-      adminIds: { $in: [userId] },
-    });
+    // Find the community and check if it exists
+    const community = await Community.findById(communityId);
+    if (!community) {
+      throw new Error("Community not found");
+    }
 
+    // Check if the user is authorized (exists in adminIds)
+    const isAuthorized = community.adminIds.includes(userId);
     if (!isAuthorized) {
       throw new Error("User is not authorized to perform this action");
     }
 
-    const userIds = [userId];
-
-    const { allExist, missingIds } = await checkRecordsExist(userIds, User);
-    if (!allExist) {
-      throw new Error(
-        `The user(s) does not exists against these id(s): ${missingIds}`
-      );
-    }
-
-    const community = await Community.findByIdAndUpdate(
+    // Update the community if authorized
+    const updatedCommunity = await Community.findByIdAndUpdate(
       communityId,
       {
         name,
@@ -76,11 +70,11 @@ const updateCommunity = async (updateData) => {
       { new: true }
     );
 
-    if (!community) {
-      throw new Error("Community not found");
+    if (!updatedCommunity) {
+      throw new Error("Community update failed");
     }
 
-    return community.serialize();
+    return updatedCommunity.serialize();
   } catch (error) {
     throw error;
   }
@@ -88,6 +82,11 @@ const updateCommunity = async (updateData) => {
 
 const addMembersToCommunity = async (userId, communityId, memberIds) => {
   try {
+    const community = await Community.findById(communityId);
+    if (!community) {
+      throw new Error("Community not found");
+    }
+
     // Check if user is an admin of the community
     const isAuthorized = await Community.exists({
       _id: communityId,
@@ -96,11 +95,6 @@ const addMembersToCommunity = async (userId, communityId, memberIds) => {
 
     if (!isAuthorized) {
       throw new Error("User is not authorized to perform this action");
-    }
-
-    const community = await Community.findById(communityId);
-    if (!community) {
-      return res.status(404).json({ error: "Community not found" });
     }
 
     const existingMembers = new Set(
@@ -135,6 +129,11 @@ const addMembersToCommunity = async (userId, communityId, memberIds) => {
 
 const removeMembersFromCommunity = async (userId, communityId, memberIds) => {
   try {
+    const community = await Community.findById(communityId);
+    if (!community) {
+      throw new Error("Community not found");
+    }
+
     // Check if user is an admin of the community
     const isAuthorized = await Community.exists({
       _id: communityId,
@@ -143,11 +142,6 @@ const removeMembersFromCommunity = async (userId, communityId, memberIds) => {
 
     if (!isAuthorized) {
       throw new Error("User is not authorized to perform this action");
-    }
-
-    const community = await Community.findById(communityId);
-    if (!community) {
-      return res.status(404).json({ error: "Community not found" });
     }
 
     let shouldSave = false;
