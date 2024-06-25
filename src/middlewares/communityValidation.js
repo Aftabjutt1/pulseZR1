@@ -118,9 +118,30 @@ const validateremoveMembersFromCommunity = (req, res, next) => {
   next();
 };
 
+const validateMakeAdmin = (req, res, next) => {
+  const {
+    community_id: communityId,
+    user_id: userId,
+    member_id: memberId,
+  } = req.body;
+
+  if (!communityId) {
+    return res.status(400).json({ error: "Community ID is required" });
+  }
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+  if (!memberId) {
+    return res.status(400).json({ error: "Member ID is required" });
+  }
+
+  next();
+};
+
 export {
   validateCreateCommunity,
   validateUpdateCommunity,
   validateaddMembersToCommunity,
   validateremoveMembersFromCommunity,
+  validateMakeAdmin,
 };

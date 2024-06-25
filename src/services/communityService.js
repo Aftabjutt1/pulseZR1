@@ -176,6 +176,37 @@ const removeMembersFromCommunity = async (userId, communityId, memberIds) => {
   }
 };
 
+const makeAdminOnCommunity = async (communityId, userId, memberId) => {
+  try {
+    const community = await Community.findById(communityId);
+    if (!community) {
+      throw new Error("Community not found");
+    }
+
+    // Check if user is an admin of the community
+    const isAuthorized = await Community.exists({
+      _id: communityId,
+      adminIds: { $in: [userId] },
+    });
+
+    if (!isAuthorized) {
+      throw new Error("User is not authorized to perform this action");
+    }
+
+    // Update adminIds if not already an admin
+    if (!community.adminIds.includes(memberId)) {
+      community.adminIds.push(memberId);
+    } else {
+      console.log(`User ${memberId} is already an admin of this community`);
+    }
+
+    await community.save();
+
+    return community.serialize();
+  } catch (error) {
+    throw error;
+  }
+};
 
 const countOnlineUsers = async (communityId) => {
   try {
@@ -202,5 +233,6 @@ export {
   updateCommunity,
   addMembersToCommunity,
   removeMembersFromCommunity,
+  makeAdminOnCommunity,
   countOnlineUsers,
 };

@@ -2,6 +2,7 @@ import { getUserByIdService } from "../services/userService.js";
 import {
   addMembersToCommunity,
   createCommunity,
+  makeAdminOnCommunity,
   removeMembersFromCommunity,
   updateCommunity,
 } from "../services/communityService.js";
@@ -126,9 +127,41 @@ const removeMembersFromCommunityController = async (req, res) => {
   }
 };
 
+const makeAdminOnCommunityController = async (req, res) => {
+  const {
+    community_id: communityId,
+    user_id: userId,
+    member_id: memberId,
+  } = req.body;
+
+  try {
+    const updatedCommunity = await makeAdminOnCommunity(
+      communityId,
+      userId,
+      memberId
+    );
+
+    return res.status(200).json({
+      message: "Admin added successfully",
+      community: updatedCommunity,
+    });
+  } catch (error) {
+    console.error("Error making admin:", error);
+    let statusCode = 500;
+    if (
+      error.message === "Community not found" ||
+      error.message === "User is not authorized"
+    ) {
+      statusCode = 404; // Not found status
+    }
+    return res.status(statusCode).json({ error: error.message });
+  }
+};
+
 export {
   communityCreateController,
   communityUpdateController,
   addMembersToCommunityController,
   removeMembersFromCommunityController,
+  makeAdminOnCommunityController,
 };

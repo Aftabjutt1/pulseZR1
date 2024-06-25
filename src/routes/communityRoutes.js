@@ -4,12 +4,14 @@ import {
   addMembersToCommunityController,
   communityCreateController,
   communityUpdateController,
+  makeAdminOnCommunityController,
   removeMembersFromCommunityController,
 } from "../controllers/communityController.js";
 
 import {
   validateaddMembersToCommunity,
   validateCreateCommunity,
+  validateMakeAdmin,
   validateremoveMembersFromCommunity,
   validateUpdateCommunity,
 } from "../middlewares/communityValidation.js";
@@ -31,6 +33,11 @@ router.post(
   "/community/remove-member",
   validateremoveMembersFromCommunity,
   removeMembersFromCommunityController
+);
+router.post(
+  "/community/make-admin",
+  validateMakeAdmin,
+  makeAdminOnCommunityController
 );
 // router.get("/community", communityListController);
 // router.get("/community", communityListController);
