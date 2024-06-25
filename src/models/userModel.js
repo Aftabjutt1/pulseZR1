@@ -10,6 +10,7 @@ class UserClass {
     verificationCode,
     isVerified = false,
     blocked = false,
+    online = false,
   }) {
     this.firstName = firstName;
     this.lastName = lastName;
@@ -19,17 +20,27 @@ class UserClass {
     this.verificationCode = verificationCode;
     this.isVerified = isVerified;
     this.blocked = blocked;
+    this.online = online;
   }
 
   static schema = {
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    phoneNumber: { type: String, required: true },
+    firstName: {
+      type: String,
+      required: function() { return !this.lastName || !!this.firstName; },
+      trim: true
+    },
+    lastName: {
+      type: String,
+      required: function() { return !this.firstName || !!this.lastName; },
+      trim: true
+    },
+    email: { type: String, required: true, unique: true, trim: true },
+    phoneNumber: { type: String, required: true, trim: true },
     password: { type: String, required: true },
-    verificationCode: { type: String },
+    verificationCode: { type: String, trim: true },
     isVerified: { type: Boolean, default: false },
     blocked: { type: Boolean, default: false },
+    online: { type: Boolean, default: false },
   };
 
   serialize() {
@@ -41,6 +52,7 @@ class UserClass {
       phoneNumber: this.phoneNumber,
       isVerified: this.isVerified,
       blocked: this.blocked,
+      online: this.online,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

@@ -2,6 +2,7 @@ import {
   signupService,
   verifyUserService,
   loginService,
+  logoutService,
   forgotPasswordService,
   resetPasswordService,
 } from "../services/authService.js";
@@ -40,6 +41,20 @@ const login = async (req, res) => {
     const user = await loginService(email, password);
     res.status(200).json({
       message: "User successfully logged in",
+      data: user,
+    });
+  } catch (error) {
+    console.error("Error: ", error);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const logout = async (req, res) => {
+  const { user_id: userId } = req.body;
+  try {
+    const user = await logoutService(userId);
+    res.status(200).json({
+      message: "User successfully logged out",
       data: user,
     });
   } catch (error) {

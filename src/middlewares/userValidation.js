@@ -69,6 +69,16 @@ const validateLogin = (req, res, next) => {
   next();
 };
 
+const validateLogout = (req, res, next) => {
+  const { user_id: userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: "User Id is required" });
+  }
+
+  next();
+};
+
 const validateResetPassword = (req, res, next) => {
   const { password, confirm_password: confirmPassword } = req.body;
 
@@ -179,6 +189,7 @@ const validateRepotedUserList = (req, res, next) => {
 export {
   validateSignup,
   validateLogin,
+  validateLogout,
   validateResetPassword,
   validateUpdateUser,
   validateGetUser,
