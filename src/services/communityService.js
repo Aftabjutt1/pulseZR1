@@ -3,16 +3,17 @@ import { checkRecordsExist } from "./util.js";
 import { Community } from "../models/communityModel.js";
 
 const createCommunity = async (communityData) => {
+  // NOTE: In creating the community the user which is creating the community will be only admin
+  //  and it will aslo be a member and can add mulitple mebers at the time of creation
   try {
     const {
       user_id: userId,
       member_ids: memberIds,
-      admin_ids: adminIds,
       name,
       description,
     } = communityData;
 
-    const userIds = [...new Set([...memberIds, ...adminIds, userId])];
+    const userIds = [...new Set([...memberIds, userId])];
 
     const { allExist, missingIds } = await checkRecordsExist(userIds, User);
     if (!allExist) {
@@ -24,7 +25,7 @@ const createCommunity = async (communityData) => {
     const community = await new Community({
       name,
       description,
-      adminIds,
+      adminIds: [userId],
       memberIds,
       createdBy: userId,
       updatedBy: userId,
@@ -44,6 +45,16 @@ const updateCommunity = async (updateData) => {
       name,
       description,
     } = updateData;
+
+    // Check if user is an admin of the community
+    const isAuthorized = await Community.exists({
+      _id: communityId,
+      adminIds: { $in: [userId] },
+    });
+
+    if (!isAuthorized) {
+      throw new Error("User is not authorized to perform this action");
+    }
 
     const userIds = [userId];
 
@@ -75,11 +86,21 @@ const updateCommunity = async (updateData) => {
   }
 };
 
-const addMembersToCommunity = async (communityId, memberIds) => {
+const addMembersToCommunity = async (userId, communityId, memberIds) => {
   try {
+    // Check if user is an admin of the community
+    const isAuthorized = await Community.exists({
+      _id: communityId,
+      adminIds: { $in: [userId] },
+    });
+
+    if (!isAuthorized) {
+      throw new Error("User is not authorized to perform this action");
+    }
+
     const community = await Community.findById(communityId);
     if (!community) {
-      throw new Error("Community not found");
+      return res.status(404).json({ error: "Community not found" });
     }
 
     const existingMembers = new Set(
@@ -100,6 +121,7 @@ const addMembersToCommunity = async (communityId, memberIds) => {
     }
 
     if (shouldSave) {
+      community.updatedBy = userId; // Update updatedBy property
       await community.save();
     } else {
       console.log("No new members to add, skipping save operation.");
@@ -111,14 +133,24 @@ const addMembersToCommunity = async (communityId, memberIds) => {
   }
 };
 
-const removeMembersFromCommunity = async (communityId, memberIds) => {
+const removeMembersFromCommunity = async (userId, communityId, memberIds) => {
   try {
-    const community = await Community.findById(communityId);
-    if (!community) {
-      throw new Error(`Community not found`);
+    // Check if user is an admin of the community
+    const isAuthorized = await Community.exists({
+      _id: communityId,
+      adminIds: { $in: [userId] },
+    });
+
+    if (!isAuthorized) {
+      throw new Error("User is not authorized to perform this action");
     }
 
-    let shouldSave = false; // Flag to track if changes should be saved
+    const community = await Community.findById(communityId);
+    if (!community) {
+      return res.status(404).json({ error: "Community not found" });
+    }
+
+    let shouldSave = false;
 
     for (const memberId of memberIds) {
       if (!community.memberIds.includes(memberId)) {
@@ -138,6 +170,7 @@ const removeMembersFromCommunity = async (communityId, memberIds) => {
     }
 
     if (shouldSave) {
+      community.updatedBy = userId; // Update updatedBy property
       await community.save();
     } else {
       console.log("No members removed, skipping save operation.");
@@ -148,6 +181,7 @@ const removeMembersFromCommunity = async (communityId, memberIds) => {
     throw error;
   }
 };
+
 
 const countOnlineUsers = async (communityId) => {
   try {

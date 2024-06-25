@@ -21,6 +21,10 @@ const communityCreateController = async (req, res) => {
       error.message.includes("The user(s) does not exists against these id(s):")
     ) {
       statusCode = 400; // Bad request status
+    } else if (
+      error.message === "User is not authorized to perform this action"
+    ) {
+      statusCode = 400; // Bad Request
     }
 
     return res.status(statusCode).json({ error: error.message });
@@ -44,6 +48,10 @@ const communityUpdateController = async (req, res) => {
       error.message.includes("The user(s) does not exists against these id(s):")
     ) {
       statusCode = 400; // Bad request status
+    } else if (
+      error.message === "User is not authorized to perform this action"
+    ) {
+      statusCode = 400; // Bad Request
     }
 
     return res.status(statusCode).json({ error: error.message });
@@ -51,10 +59,15 @@ const communityUpdateController = async (req, res) => {
 };
 
 const addMembersToCommunityController = async (req, res) => {
-  const { community_id: communityId, member_ids: memberIds } = req.body;
+  const {
+    user_id: userId,
+    community_id: communityId,
+    member_ids: memberIds,
+  } = req.body;
 
   try {
     const updatedCommunity = await addMembersToCommunity(
+      userId,
       communityId,
       memberIds
     );
@@ -69,6 +82,10 @@ const addMembersToCommunityController = async (req, res) => {
     let statusCode = 500;
     if (error.message === "Community not found") {
       statusCode = 404; // Not found status
+    } else if (
+      error.message === "User is not authorized to perform this action"
+    ) {
+      statusCode = 400; // Bad Request
     }
 
     return res.status(statusCode).json({ error: error.message });
@@ -76,10 +93,15 @@ const addMembersToCommunityController = async (req, res) => {
 };
 
 const removeMembersFromCommunityController = async (req, res) => {
-  const { community_id: communityId, member_ids: memberIds } = req.body;
+  const {
+    user_id: userId,
+    community_id: communityId,
+    member_ids: memberIds,
+  } = req.body;
 
   try {
     const updatedCommunity = await removeMembersFromCommunity(
+      userId,
       communityId,
       memberIds
     );
@@ -94,6 +116,10 @@ const removeMembersFromCommunityController = async (req, res) => {
     let statusCode = 500;
     if (error.message === "Community not found") {
       statusCode = 404; // Not found status
+    } else if (
+      error.message === "User is not authorized to perform this action"
+    ) {
+      statusCode = 400; // Bad Request
     }
 
     return res.status(statusCode).json({ error: error.message });
